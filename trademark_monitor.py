@@ -10,9 +10,13 @@
 # TODO: fix commentaries and description
 
 import platform
+
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 # TODO: check if possible: from input_data import AdvancedSearch
+
+class OSNotRecognized(Exception):
+    """Raise if OS is not recognized."""
 
 
 def check_os():
@@ -28,8 +32,7 @@ def check_os():
     elif 'win' in operation_system.lower():
         driver = webdriver.Chrome('chromedriver\chromedriver_win32.exe')
     else:
-        print('Couldn\'t find out your operation system. Program will now stop.')
-        exit()
+        raise OSNotRecognized('Couldn\'t find out your operation system. Program will now stop.')
     return driver
 
 
@@ -49,12 +52,18 @@ def access_search_form(driver):
     return advanced_search_form_path
 
 
-def search_process(driver):
+def search_process(driver, trademark_name, nice_class, vienna_class):
+    elements = ['.//input[@id="linguisticTm"]',
+                './/input[@id="select-EU"]',
+                ]
+    for element in elements:
+        driver.find_element_by_xpath(element).click()
+
     driver.find_element_by_xpath('.//input[@id="linguisticTm"]').click()
     driver.find_element_by_xpath('.//input[@id="select-EU"]').click() 
     driver.find_element_by_xpath('.//input[@id="select-non-EU"]').click() 
     driver.find_element_by_xpath('.//button[@id="btnSelectAll"]').click() 
-    driver.find_element_by_id('TrademarkName').send_keys(tm_name)
+    driver.find_element_by_id('TrademarkName').send_keys(trademark_name)
     
     select = Select(driver.find_element_by_id('TradeMarkStatus'))
     select.select_by_value('Filed')
@@ -65,12 +74,16 @@ def search_process(driver):
     
     select = Select(driver.find_element_by_id('cmbSortField'))
     select.select_by_value('ad')
-    select.select_by_value('Registered')
 
     select = Select(driver.find_element_by_id('cmbOrder'))
     select.select_by_value('DESC')
 
     driver.find_element_by_id('SearchCopy').click()
+
+
+def save_page(driver):
+    page_source = driver.page_source
+
 
 def send_results(driver):
     driver.find_element_by_title('Share with a friend').click()
@@ -90,8 +103,8 @@ def send_results(driver):
 if __name__ == '__main__':
     check_os = check_os()
     access_search_form = access_search_form(driver=check_os)
-    trezor_tm = search_process(tm_name='*tre**r*', nice_class='9,36,38,42')
-    satoshilabs_tm = search_process(tm_name='*satoshi*', nice_class='9,35,36,38,42')
-    logo_tm = search_process(tm_name='*satoshi*', nice_class='9,35,36,38,42', vienna_class='14.05.21,14.05.23')
+    trezor_tm = search_process(trademark_name='*tre**r*', nice_class='9,36,38,42')
+    satoshilabs_tm = search_process(trademark_name='*satoshi*', nice_class='9,35,36,38,42')
+    logo_tm = search_process(trademark_name='*satoshi*', nice_class='9,35,36,38,42', vienna_class='14.05.21,14.05.23')
     # search_process = search_process(driver=check_os)
 
