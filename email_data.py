@@ -1,3 +1,3 @@
-sender = 'sender_email'
-openkeyword = 'fill_in_password'
-receiver = 'receiver_email'
+sender = 'tmmonitoringsl@gmail.com'
+openkeyword = 'monit_tm_test'
+receiver = 'legal@satoshilabs.com'
