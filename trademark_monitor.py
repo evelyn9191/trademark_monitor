@@ -49,41 +49,36 @@ def check_os():
 
 
 def access_search_form(driver):
-    """Open advanced search form.
-
-    Opens website and advanced search form. The URL of the form will later be used
-    to return to the main page (and not the form particularly, because the URL on the
-    website doesn't change with actions performed).
+    """Open website and its advanced search form.
 
     :param driver: Chrome webdriver needed for Selenium module to work properly.
-    :return: URL of the main page.
     """
     driver.get('https://www.tmdn.org/tmview/welcome')
     while True:
         try:
             driver.find_element_by_id('buttonBox').click()    # Accept cookies
         except selenium.common.exceptions.NoSuchElementException:    # TODO: Check if working
-            logging.INFO('Raised exception:', exc_info=True)
             driver.close()
             driver.quit()
+            logging.INFO('Raised exception:', exc_info=True)
         except NameError:
-            logging.INFO('Raised exception:', exc_info=True)
             driver.close()
             driver.quit()
+            logging.INFO('Raised exception:', exc_info=True)
         break
     driver.find_element_by_id('lnkAdvancedSearch').click()    # Access advanced search form
-    main_page_url = driver.current_url
-    return main_page_url
 
 
 def search_process(driver, trademark_name, nice_class, searched_id, vienna_class=None):
     """Fill out the search form.
 
+    Fill out advance search form with trademark parameters and download web page.
+
     :param driver: Chrome webdriver needed for Selenium module to work properly.
     :param trademark_name: Search query for similar trademark names.
     :param nice_class: Search query for registered Nice classes of company trademark.
     :param vienna_class: Search query for registered Vienna classes of company logo.
-    :return: None.
+    :return: Downloaded web page.
     """
     driver.find_element_by_class_name('DesignatedTerritoriesControl').click()
     driver.find_element_by_xpath(".//*[contains(text(), "
@@ -124,7 +119,7 @@ def search_process(driver, trademark_name, nice_class, searched_id, vienna_class
     driver.find_element_by_id('SearchCopy').click()    # Start searching
 
     time.sleep(10)   # Wait till the database content loads
-    print('Searched through successfully for TM {}'.format(trademark_name))
+    print('Searched through successfully for TM {}'.format(searched_id))
     html_source = driver.page_source
     searched_name = searched_id
     with open('tm_{}.html'.format(searched_name), 'w', encoding='utf-8') as f:
@@ -160,6 +155,13 @@ def edit_downloaded_html():
 
 
 def get_trademark_url(edit_downloaded_html):
+    """Parse web page for database table, extract application number and url and
+    save all in a dictionary.
+
+    :param edit_downloaded_html: Downloaded web pages with trademark search results.
+    :return: list List of dictionaries containing ID of trademark application in key
+    and url address of the trademark in value.
+    """
     tm_name_url_list = []
     for clean_tm_file in edit_downloaded_html:
 
@@ -183,12 +185,12 @@ def get_trademark_url(edit_downloaded_html):
 
 
 def create_email(get_trademark_url, email_data):
-    """Send email with links to articles.
+    """Send email with web page with search results in email attachment
+    and urls of each trademark.
 
-    Put class with articles into email as HTML language and send it.
-
-    :param [str] check_articles: List with extracted article titles and links.
-    :param module email_data: Module with variables with email access info.
+    :param get_trademark_url: List of dictionaries containing ID of trademark application
+    in key and url address of the trademark in value.
+    :param email_data: Module with variables with email access info.
     """
     urls_list = get_trademark_url
 
@@ -231,6 +233,7 @@ def create_email(get_trademark_url, email_data):
 
 
 def finish_search(driver):
+    """Close browser."""
     driver.close()
     driver.quit()
 
@@ -243,11 +246,11 @@ def main(check_os, access_search_form, search_process, edit_downloaded_html, get
     satoshilabs_tm = search_process(driver=driver, trademark_name='*satoshi*', nice_class='9,35,36,38,42',
                                     searched_id='satoshi')
     logo_trezor_tm = search_process(driver=driver, trademark_name='*trez*r*', nice_class='9,35,36,38,42',
-                                    vienna_class='14.05.21,14.05.23', searched_id='trezorlogo')
+                                    vienna_class='14.05.21,14.05.23', searched_id='trezor logo')
     logo_tresor_tm = search_process(driver=driver, trademark_name='*tres*r*', nice_class='9,35,36,38,42',
-                                    vienna_class='14.05.21,14.05.23', searched_id='tresor_logo')
+                                    vienna_class='14.05.21,14.05.23', searched_id='tresor logo')
     logo_satoshi_tm = search_process(driver=driver, trademark_name='*satoshi*', nice_class='9,35,36,38,42',
-                                     vienna_class='14.05.21,14.05.23', searched_id='satoshilogo')
+                                     vienna_class='14.05.21,14.05.23', searched_id='satoshi logo')
     edit_downloaded_html = edit_downloaded_html()
     get_trademark_url = get_trademark_url(edit_downloaded_html=edit_downloaded_html)
     create_email(get_trademark_url, email_data)
