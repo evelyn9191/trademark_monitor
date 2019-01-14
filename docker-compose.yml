@@ -1,0 +1,8 @@
+version: '2.1'
+
+services:
+  trademark_monitor:
+    image: trademark_monitor
+    build:
+      context: .
+      dockerfile: Dockerfile
