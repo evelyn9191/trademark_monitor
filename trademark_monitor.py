@@ -7,20 +7,21 @@
 # There has to be module recaptcha_solved.py. For the detailed data on the code
 # see: http://scraping.pro/recaptcha-solve-selenium-python/#whole_code
 # TODO: Chrome should not be seen working if send_results function will be fixed.
-# If it won't be fixed, opening in new window is needed to be planned.
+# TODO: Set function if any exception is raised any time.
+
 
 import platform
-import time
 import re
 import os
+import time
 
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import smtplib
+import logging
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.utils import COMMASPACE, formatdate
 import glob
 
 import email_data
@@ -61,16 +62,21 @@ def access_search_form(driver):
     while True:
         try:
             driver.find_element_by_id('buttonBox').click()    # Accept cookies
-        except selenium.common.exceptions.NoSuchElementException:
+        except selenium.common.exceptions.NoSuchElementException:    # TODO: Check if working
+            logging.INFO('Raised exception:', exc_info=True)
             driver.close()
+            driver.quit()
+        except NameError:
+            logging.INFO('Raised exception:', exc_info=True)
+            driver.close()
+            driver.quit()
         break
-    # NameError: name 'selenium' is not defined
     driver.find_element_by_id('lnkAdvancedSearch').click()    # Access advanced search form
     main_page_url = driver.current_url
     return main_page_url
 
 
-def search_process(driver, trademark_name, nice_class, searched_id, vienna_class=None):    # TODO: last search 9/1/2019
+def search_process(driver, trademark_name, nice_class, searched_id, vienna_class=None):
     """Fill out the search form.
 
     :param driver: Chrome webdriver needed for Selenium module to work properly.
@@ -80,19 +86,24 @@ def search_process(driver, trademark_name, nice_class, searched_id, vienna_class
     :return: None.
     """
     driver.find_element_by_class_name('DesignatedTerritoriesControl').click()
-    driver.find_element_by_xpath(".//*[contains(text(), 'Select all EU member states')]").click()
-    driver.find_element_by_xpath(".//*[contains(text(), 'Select all Non-EU member states')]").click()
-    driver.find_element_by_xpath(".//*[contains(text(), 'Trade mark offices')]").click()    # Click away
+    driver.find_element_by_xpath(".//*[contains(text(), "
+                                 "'Select all EU member states')]").click()
+    driver.find_element_by_xpath(".//*[contains(text(), "
+                                 "'Select all Non-EU member states')]").click()
+    driver.find_element_by_xpath(".//*[contains(text(), "
+                                 "'Trade mark offices')]").click()    # Click away
 
     driver.find_element_by_class_name('SelectedOfficesControl').click()
     driver.find_element_by_xpath(".//*[contains(text(), 'Select All')]").click()
-    driver.find_element_by_xpath(".//*[contains(text(), 'Trade mark offices')]").click()    # Click away
+    driver.find_element_by_xpath(".//*[contains(text(), "
+                                 "'Trade mark offices')]").click()    # Click away
 
     driver.find_element_by_id('TrademarkName').send_keys(trademark_name)
 
     driver.find_element_by_class_name('TrademarkStatusControl').click()
     driver.find_element_by_xpath(".//*[contains(text(), 'Filed')]").click()
-    driver.find_element_by_xpath(".//*[contains(text(), 'Trade mark offices')]").click()    # Click away
+    driver.find_element_by_xpath(".//*[contains(text(), "
+                                 "'Trade mark offices')]").click()    # Click away
 
     driver.find_element_by_id('NiceClass').send_keys(nice_class)
 
@@ -102,8 +113,10 @@ def search_process(driver, trademark_name, nice_class, searched_id, vienna_class
         pass
 
     driver.find_element_by_class_name('SortControl').click()
-    driver.find_element_by_xpath("//select[@name='cmbSortField']/option[text()='Application date']").click()
-    driver.find_element_by_xpath(".//*[contains(text(), 'Trade mark offices')]").click()    # Click away
+    driver.find_element_by_xpath("//select[@name='cmbSortField']"
+                                 "/option[text()='Application date']").click()
+    driver.find_element_by_xpath(".//*[contains(text(), "
+                                 "'Trade mark offices')]").click()    # Click away
 
     driver.find_element_by_class_name('cmbOrderControl').click()
     driver.find_element_by_xpath(".//*[contains(text(), 'Descending')]").click()
@@ -134,14 +147,15 @@ def edit_downloaded_html():
         if no_results is not None:
             html.close()
             os.remove(tm_file)
-        #else:
-        #    whole_table = soup.find_all('div', id="table_of_results")
-        #    to_be_kept = re.compile(('(?=<table border="0" cellpadding="0" cellspacing="0" '
-        #                             'class="ui-pg-table" ).*(?<=id="rs_mgrid")'), flags=re.DOTALL
-        #                            ).findall(str(whole_table))
-        #    string_to_be_kept = ''.join(to_be_kept)
-        #    with open(tm_file, 'w', encoding='utf-8') as f:
-        #        new_html = f.write(string_to_be_kept)
+        else:
+            whole_table = soup.find_all('div', id="table_of_results")
+            to_be_kept = re.compile(('(?=<table border="0" cellpadding="0" cellspacing="0" '
+                                     'class="ui-pg-table" ).*(?<=id="rs_mgrid")'), flags=re.DOTALL
+                                    ).findall(str(whole_table))
+            string_to_be_kept = ''.join(to_be_kept)
+            with open(tm_file, 'w', encoding='utf-8') as f:
+                new_html = f.write(string_to_be_kept)
+    path = glob.glob('tm_*.html')
     return path
 
 
@@ -152,7 +166,8 @@ def get_trademark_url(edit_downloaded_html):
         html = open(clean_tm_file, 'r', encoding='utf-8')
         soup = BeautifulSoup(html, 'lxml')
         results_ids = soup.find_all('div', id=re.compile("flag_rowId_"))
-        all_clean_ids = list(re.compile('(?=flag_rowId_).*?\"', flags=re.MULTILINE|re.IGNORECASE).findall(str(results_ids)))
+        all_clean_ids = list(re.compile('(?=flag_rowId_).*?\"', flags=re.MULTILINE|re.IGNORECASE)
+                             .findall(str(results_ids)))
 
         for i, value in enumerate(all_clean_ids):
             no_quotation = value.replace('\"', '')
@@ -164,7 +179,6 @@ def get_trademark_url(edit_downloaded_html):
             one_link_url_dict = {}
             one_link_url_dict[new_value] = created_url
             tm_name_url_list.append(one_link_url_dict)
-
     return tm_name_url_list
 
 
@@ -216,17 +230,12 @@ def create_email(get_trademark_url, email_data):
     print("Email successfully sent!")
 
 
-def reset_search(driver):
-    driver.find_element_by_id('btnClear').click()
-    driver.find_element_by_id('lnkAdvancedSearch').click()
-
-
 def finish_search(driver):
     driver.close()
     driver.quit()
 
 
-def main(driver, access_search_form, search_process, edit_downloaded_html, get_trademark_url):
+def main(check_os, access_search_form, search_process, edit_downloaded_html, get_trademark_url):
     driver = check_os()
     access_search_form = access_search_form(driver=driver)
     trezor_tm = search_process(driver=driver, trademark_name='*trez*r*', nice_class='9,36,38,42', searched_id='trezor')
@@ -239,25 +248,22 @@ def main(driver, access_search_form, search_process, edit_downloaded_html, get_t
                                     vienna_class='14.05.21,14.05.23', searched_id='tresor_logo')
     logo_satoshi_tm = search_process(driver=driver, trademark_name='*satoshi*', nice_class='9,35,36,38,42',
                                      vienna_class='14.05.21,14.05.23', searched_id='satoshilogo')
-    finish_search(driver)
     edit_downloaded_html = edit_downloaded_html()
     get_trademark_url = get_trademark_url(edit_downloaded_html=edit_downloaded_html)
+    create_email(get_trademark_url, email_data)
+    finish_search(driver=driver)
+
 
 if __name__ == '__main__':
+    main(check_os, access_search_form, search_process, edit_downloaded_html, get_trademark_url)
+    trezor_tm = search_process(driver=driver, trademark_name='*tres*r*', nice_class='9,36,38,42', searched_id='tresor')
+    satoshilabs_tm = search_process(driver=driver, trademark_name='*satoshi*', nice_class='9,35,36,38,42', searched_id='satoshi')
+    logo_trezor_tm = search_process(driver=driver, trademark_name='*trez*r*', nice_class='9,35,36,38,42',
+                             vienna_class='14.05.21,14.05.23', searched_id='trezorlogo')
+    logo_tresor_tm = search_process(driver=driver, trademark_name='*tres*r*', nice_class='9,35,36,38,42',
+                                    vienna_class='14.05.21,14.05.23', searched_id='tresor_logo')
+    logo_satoshi_tm = search_process(driver=driver, trademark_name='*satoshi*', nice_class='9,35,36,38,42', vienna_class='14.05.21,14.05.23', searched_id='satoshilogo')
     edit_downloaded_html = edit_downloaded_html()
     get_trademark_url = get_trademark_url(edit_downloaded_html=edit_downloaded_html)
-    #main(check_os, access_search_form, search_process, edit_downloaded_html, get_trademark_url)
     create_email(get_trademark_url, email_data)
-    #trezor_tm = search_process(driver=driver, trademark_name='*tres*r*', nice_class='9,36,38,42', searched_id='tresor')
-    #send_results(driver=driver, email_data=email_data, trademark_name='*tres*r*')
-    #satoshilabs_tm = search_process(driver=driver, trademark_name='*satoshi*', nice_class='9,35,36,38,42', searched_id='satoshi')
-    #send_results(driver=driver, email_data=email_data)
-    #logo_trezor_tm = search_process(driver=driver, trademark_name='*trez*r*', nice_class='9,35,36,38,42',
-                             #vienna_class='14.05.21,14.05.23', searched_id='trezorlogo')
-    #send_results(driver=driver, email_data=email_data)
-    #logo_tresor_tm = search_process(driver=driver, trademark_name='*tres*r*', nice_class='9,35,36,38,42',
-                                    #vienna_class='14.05.21,14.05.23', searched_id='tresor_logo')
-    #send_results(driver=driver, email_data=email_data)
-    #logo_satoshi_tm = search_process(driver=driver, trademark_name='*satoshi*', nice_class='9,35,36,38,42', vienna_class='14.05.21,14.05.23', searched_id='satoshilogo')
-    #send_results(driver=driver, email_data=email_data, trademark_name='*satoshi*')
-    #finish_search(driver=driver)
+    finish_search(driver=driver)
