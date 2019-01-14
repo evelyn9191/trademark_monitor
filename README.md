@@ -10,7 +10,7 @@ trademark detailed page.
 
 ## Script structure:
 1. Check operation system to install correct driver for Chrome.
-2. Access Advanced Search Form
+2. Access Advanced Search Form.
 3. Run search round for each trademark for respective parameters and download the web page with results.
 4. Extract table with data without unnecessary formatting and rewrite the original file with this data.
 5. Extract ID and URL of a trademark application.
