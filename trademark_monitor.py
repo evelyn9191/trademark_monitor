@@ -149,7 +149,7 @@ def edit_downloaded_html():
                                     ).findall(str(whole_table))
             string_to_be_kept = ''.join(to_be_kept)
             with open(tm_file, 'w', encoding='utf-8') as f:
-                new_html = f.write(string_to_be_kept)
+                f.write(string_to_be_kept)
     path = glob.glob('tm_*.html')
     return path
 
@@ -170,8 +170,15 @@ def get_trademark_url(edit_downloaded_html):
         results_ids = soup.find_all('div', id=re.compile("flag_rowId_"))
         all_clean_ids = list(re.compile('(?=flag_rowId_).*?\"', flags=re.MULTILINE|re.IGNORECASE)
                              .findall(str(results_ids)))
-
+        clean_data = map(lambda value: re.sub('(\"|flag_rowId)', '', value))
+        # list(clean_data)
+        #print(list(clean_data))
         for i, value in enumerate(all_clean_ids):
+            #clean_data = map(lambda value: re.sub('(\"|flag_rowId)', '', value))
+            #list(clean_data)
+            # former value is now value v clean_data, so:
+            # for value in clean data:
+            # include_name = ...
             no_quotation = value.replace('\"', '')
             no_id = no_quotation.replace('flag_rowId_', '')
             include_name = 'for code ' + no_id + ' in file ' + clean_tm_file + ': '
