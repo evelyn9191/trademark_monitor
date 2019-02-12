@@ -132,6 +132,7 @@ def search_process(driver, trademark_name, nice_class, searched_id, vienna_class
     time.sleep(10)   # Wait till the database content loads
     print('Searched through successfully for TM {}'.format(searched_id))
 
+    '''
     json_file = str(driver.last_request) + '.jsonformatted'
 
     driver.get(json_file)
@@ -149,8 +150,8 @@ def search_process(driver, trademark_name, nice_class, searched_id, vienna_class
     r = requests.get(json_file, headers={'Content-Type': 'application/json', 'Accept-Encoding': 'None', 'Content-Disposition': 'attachment'}) #Content-Disposition: attachment; , filename=myfile.json
     print(r.headers)
 
-
-    '''
+    # Here is the end of my part
+    # Here is the start of the notes
 
 
 
@@ -272,7 +273,7 @@ def json_parse(fileobj, decoder=json.JSONDecoder(), buffersize=2048,
     val2 = val1['tags'][0]['results'][0]['values']
     print
     pd.DataFrame(val2, columns=["time", "temperature", "quality"])
-
+    '''
     html_source = driver.page_source
     searched_name = searched_id
     with open('tm_{}.html'.format(searched_name), 'w', encoding='utf-8') as f:
@@ -280,7 +281,6 @@ def json_parse(fileobj, decoder=json.JSONDecoder(), buffersize=2048,
     driver.find_element_by_id('btnClear').click()
     driver.find_element_by_id('lnkAdvancedSearch').click()  # Get back to advanced search form
     return downloaded_doc
-    '''
 
 
 def edit_downloaded_html():
@@ -324,7 +324,7 @@ def get_trademark_url(edit_downloaded_html):
         results_ids = soup.find_all('div', id=re.compile("flag_rowId_"))
         all_clean_ids = list(re.compile('(?=flag_rowId_).*?\"', flags=re.MULTILINE|re.IGNORECASE)
                              .findall(str(results_ids)))
-        clean_data = map(lambda value: re.sub('(\"|flag_rowId)', '', value))
+        clean_data = map(lambda value: re.sub('(\"|flag_rowId)', '', value), all_clean_ids)
         # list(clean_data)
         #print(list(clean_data))
         for i, value in enumerate(all_clean_ids):
