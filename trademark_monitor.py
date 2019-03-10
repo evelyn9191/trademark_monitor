@@ -13,6 +13,8 @@ import sys
 import re
 import os
 import time
+import requests
+
 import json
 import random
 from urllib.request import urlopen, urlretrieve
@@ -46,11 +48,11 @@ def check_os():
     """
     operation_system = platform.system()
     if 'linux' in operation_system.lower():
-        driver = webdriver.Chrome('chromedriver\chromedriver_linux64')
+        driver = webdriver.Chrome(executable_path='chromedriver/chromedriver_linux64')
     elif 'darwin' in operation_system.lower():
-        driver = webdriver.Chrome('chromedriver\chromedriver_mac64')
+        driver = webdriver.Chrome(executable_path='chromedriver/chromedriver_mac64')
     elif 'win' in operation_system.lower():
-        driver = webdriver.Chrome('chromedriver\chromedriver_win32.exe')
+        driver = webdriver.Chrome(executable_path='chromedriver/chromedriver_win32.exe')
     else:
         raise OSNotRecognized('Couldn\'t find out your operation system. Program will stop.')
     return driver
