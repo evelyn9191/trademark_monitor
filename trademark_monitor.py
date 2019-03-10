@@ -48,7 +48,9 @@ def check_os():
     """
     operation_system = platform.system()
     if 'linux' in operation_system.lower():
-        driver = webdriver.Chrome(executable_path='chromedriver/chromedriver_linux64')
+        options = webdriver.ChromeOptions()
+        # options.add_argument("--headless")
+        driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", chrome_options=options)
     elif 'darwin' in operation_system.lower():
         driver = webdriver.Chrome(executable_path='chromedriver/chromedriver_mac64')
     elif 'win' in operation_system.lower():
