@@ -69,12 +69,10 @@ def access_search_form(driver):
             driver.close()
             driver.quit()
             logging.INFO('Raised exception:', exc_info=True)
-            access_search_form(driver)
         except NameError:
             driver.close()
             driver.quit()
             logging.INFO('Raised exception:', exc_info=True)
-            access_search_form(driver)
         # also: ElementNotVisibleException can be anytime during search
         break
     driver.find_element_by_id('lnkAdvancedSearch').click()    # Access advanced search form
