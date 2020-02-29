@@ -1,4 +1,7 @@
 # Trademark Monitor
+(This is an example of a scraper written in Python. It is not meant to be used in practice.
+Please read the Terms of Service of the relevant services mentioned in this script.)
+
 Trademark Monitor facilitates searching of trademark applications in large trademark database TMview.
 It allows user to define parameters of searching and provides user with output in form of html page
 containing table with trademark applications found for each search round and url links to respective
