@@ -9,23 +9,12 @@
 
 
 import platform
-import sys
 import re
 import os
 import time
-import requests
 
-import json
-import random
-from urllib.request import urlopen, urlretrieve
-
-import requests
-import pyperclip
 from seleniumwire import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 import smtplib
 import logging
@@ -34,7 +23,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import glob
 
-import email_data
+from monitoring import email_data
 
 
 class OSNotRecognized(Exception):
@@ -52,9 +41,9 @@ def check_os():
         # options.add_argument("--headless")
         driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", chrome_options=options)
     elif 'darwin' in operation_system.lower():
-        driver = webdriver.Chrome(executable_path='chromedriver/chromedriver_mac64')
+        driver = webdriver.Chrome(executable_path='../chromedriver/chromedriver_mac64')
     elif 'win' in operation_system.lower():
-        driver = webdriver.Chrome(executable_path='chromedriver/chromedriver_win32.exe')
+        driver = webdriver.Chrome(executable_path='../chromedriver/chromedriver_win32.exe')
     else:
         raise OSNotRecognized('Couldn\'t find out your operation system. Program will stop.')
     return driver
