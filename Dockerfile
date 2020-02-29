@@ -1,12 +1,12 @@
-FROM python:3.6-slim-stretch
+FROM python:3.8-slim
 
-ENV APP_DIR='/app'
-WORKDIR APP_DIR
-ENV PYTHONPATH=$APP_DIR:$PYTHONPATH
+RUN apt-get update && apt-get install
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+WORKDIR /app
 
-COPY . .
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . ./
+ENV PYTHONPATH=${PYTHONPATH}:`pwd`
 
 CMD ["python3", "trademark_monitor.py"]
